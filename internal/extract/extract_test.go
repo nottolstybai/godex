@@ -102,6 +102,17 @@ func TestLoad(t *testing.T) {
 		assert.Contains(t, names, "net/http/httptest.NewServer")
 	})
 
+	t.Run("внутренние пакеты стандартной библиотеки скрыты", func(t *testing.T) {
+		t.Parallel()
+
+		for _, pattern := range []string{"net/http/internal", "vendor/golang.org/x/net/http2/hpack"} {
+			got, err := Load(pattern)
+
+			require.NoError(t, err)
+			assert.Empty(t, got, pattern)
+		}
+	})
+
 	t.Run("пакета не существует", func(t *testing.T) {
 		t.Parallel()
 

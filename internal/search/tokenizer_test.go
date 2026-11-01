@@ -19,6 +19,13 @@ func TestTokenize(t *testing.T) {
 		{"точка в имени", "io.Reader", []string{"io", "reader"}},
 		{"цифры", "HTTP/2 server", []string{"http", "2", "server"}},
 		{"переводы строк", "first line\nsecond line", []string{"first", "line", "second", "line"}},
+		{"CamelCase", "ReadAll", []string{"readall", "read", "all"}},
+		{"CamelCase из трёх слов", "CloseIdleConnections", []string{"closeidleconnections", "close", "idle", "connections"}},
+		{"аббревиатура в начале", "HTTPServer", []string{"httpserver", "http", "server"}},
+		{"аббревиатура в конце", "parseURL", []string{"parseurl", "parse", "url"}},
+		{"цифры в конце слова", "Sum256", []string{"sum256"}},
+		{"цифры в середине", "Base64Encoding", []string{"base64encoding", "base64", "encoding"}},
+		{"идентификатор в предложении", "Use io.ReadAll now", []string{"use", "io", "readall", "read", "all", "now"}},
 	}
 
 	for _, tt := range tests {

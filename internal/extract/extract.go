@@ -79,6 +79,23 @@ type listedPackage struct {
 	Dir        string
 	ImportPath string
 	GoFiles    []string
+	Standard   bool
+}
+
+// isHiddenStdPackage сообщает, что пакет стандартной библиотеки нельзя импортировать
+// из своего кода. Свои internal-пакеты пользователя мы не скрываем: он ими пользуется.
+func isHiddenStdPackage(pkg listedPackage) bool {
+	if !pkg.Standard {
+		return false
+	}
+
+	for part := range strings.SplitSeq(pkg.ImportPath, "/") {
+		if part == "internal" || part == "vendor" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func Load(pattern string) ([]search.Document, error) {
@@ -105,6 +122,10 @@ func Load(pattern string) ([]search.Document, error) {
 		}
 		if err != nil {
 			return nil, fmt.Errorf("decoder.Decode(%s): %w", pattern, err)
+		}
+
+		if isHiddenStdPackage(pkg) {
+			continue
 		}
 
 		docs, err := parsePackage(pkg.Dir, pkg.ImportPath, pkg.GoFiles)
