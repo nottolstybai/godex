@@ -5,8 +5,6 @@ import (
 	"unicode"
 )
 
-// Tokenize разбивает текст на слова в нижнем регистре. Для идентификатора вроде
-// ReadAll возвращает и его целиком, и его части: readall, read, all.
 func Tokenize(text string) []string {
 	words := strings.FieldsFunc(text, func(r rune) bool {
 		return !unicode.IsDigit(r) && !unicode.IsLetter(r)
@@ -28,8 +26,7 @@ func Tokenize(text string) []string {
 	return tokens
 }
 
-// splitCamelCase делит слово там, где начинается новая часть:
-// ReadAll → Read, All; HTTPServer → HTTP, Server; Base64Encoding → Base64, Encoding.
+// splitCamelCase splits camel case word: HTTPServer → HTTP, Server
 func splitCamelCase(word string) []string {
 	runes := []rune(word)
 

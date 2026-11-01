@@ -1,8 +1,10 @@
 package search
 
 type Document struct {
-	Name string
-	Text string
+	Name    string // "net/http.Client.Do"
+	Package string // "net/http"
+	Decl    string // "func (c *Client) Do(req *Request) (*Response, error)"
+	Text    string
 }
 
 type Posting struct {

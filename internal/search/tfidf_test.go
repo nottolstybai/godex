@@ -15,14 +15,14 @@ func newTestIndex() *Index {
 	})
 }
 
-// assertResults сравнивает номера документов и их порядок точно, а очки — с допуском.
+// assertResults compares order exactly and scores within a tolerance.
 func assertResults(t *testing.T, want, got []Result) {
 	t.Helper()
 
 	require.Len(t, got, len(want))
 	for i := range want {
-		assert.Equal(t, want[i].DocID, got[i].DocID, "позиция %d", i)
-		assert.InDelta(t, want[i].Score, got[i].Score, 0.001, "позиция %d", i)
+		assert.Equal(t, want[i].DocID, got[i].DocID, "position %d", i)
+		assert.InDelta(t, want[i].Score, got[i].Score, 0.001, "position %d", i)
 	}
 }
 
@@ -35,37 +35,37 @@ func TestSearchTFIDF(t *testing.T) {
 		want  []Result
 	}{
 		{
-			name:  "больше совпавших слов — выше в выдаче",
+			name:  "more matched words rank higher",
 			query: "read file",
 			want:  []Result{{DocID: 2, Score: 0.811}, {DocID: 0, Score: 0.405}, {DocID: 1, Score: 0.405}},
 		},
 		{
-			name:  "одно слово",
+			name:  "single word",
 			query: "write",
 			want:  []Result{{DocID: 1, Score: 1.099}},
 		},
 		{
-			name:  "одно из слов не найдено",
+			name:  "one word not found",
 			query: "write missing",
 			want:  []Result{{DocID: 1, Score: 1.099}},
 		},
 		{
-			name:  "слово из всех документов получает ноль",
+			name:  "word in every document scores zero",
 			query: "data",
 			want:  []Result{{DocID: 0, Score: 0}, {DocID: 1, Score: 0}, {DocID: 2, Score: 0}},
 		},
 		{
-			name:  "при равных очках раньше меньший DocID",
+			name:  "ties break by lower DocID",
 			query: "read data",
 			want:  []Result{{DocID: 0, Score: 0.405}, {DocID: 2, Score: 0.405}, {DocID: 1, Score: 0}},
 		},
 		{
-			name:  "повтор слова в запросе считается дважды",
+			name:  "repeated query word counts twice",
 			query: "read read",
 			want:  []Result{{DocID: 0, Score: 0.811}, {DocID: 2, Score: 0.811}},
 		},
 		{
-			name:  "запрос проходит через токенизатор",
+			name:  "query is tokenized",
 			query: "READ, File!",
 			want:  []Result{{DocID: 2, Score: 0.811}, {DocID: 0, Score: 0.405}, {DocID: 1, Score: 0.405}},
 		},
@@ -79,7 +79,7 @@ func TestSearchTFIDF(t *testing.T) {
 		})
 	}
 
-	t.Run("частота слова в документе умножает очки", func(t *testing.T) {
+	t.Run("term frequency multiplies score", func(t *testing.T) {
 		t.Parallel()
 
 		idx := NewIndex([]Document{
@@ -99,9 +99,9 @@ func TestSearchTFIDFEmpty(t *testing.T) {
 		name  string
 		query string
 	}{
-		{"слова нет в индексе", "missing"},
-		{"пустой запрос", ""},
-		{"только разделители", " ,.!"},
+		{"word not in index", "missing"},
+		{"empty query", ""},
+		{"separators only", " ,.!"},
 	}
 
 	for _, tt := range tests {
@@ -112,7 +112,7 @@ func TestSearchTFIDFEmpty(t *testing.T) {
 		})
 	}
 
-	t.Run("пустой индекс", func(t *testing.T) {
+	t.Run("empty index", func(t *testing.T) {
 		t.Parallel()
 
 		assert.Empty(t, NewIndex(nil).SearchTFIDF("read"))

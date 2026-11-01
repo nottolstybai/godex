@@ -1,8 +1,5 @@
-// Package eval измеряет качество поиска на настоящей документации стандартной библиотеки.
-//
-// Посмотреть результат по каждому запросу:
-//
-//	go test ./internal/eval/ -v
+// Package eval measures search quality on standard library docs.
+// Run with -v to see the rank of each query.
 package eval
 
 import (
@@ -16,7 +13,7 @@ import (
 	"github.com/nottolstybai/godex/internal/search"
 )
 
-// Запрос засчитывается, если в выдаче есть любой документ из want.
+// Any document in want counts as a hit.
 var queries = []struct {
 	text string
 	want []string
@@ -55,8 +52,8 @@ var queries = []struct {
 	{"wrap an error with a message", []string{"fmt.Errorf"}},
 }
 
-// TestRelevance не даёт качеству поиска незаметно упасть. Пороги намеренно ниже
-// текущих значений: документация меняется от версии к версии Go.
+// TestRelevance guards against quality regressions. Thresholds sit below
+// current values because docs change between Go versions.
 func TestRelevance(t *testing.T) {
 	t.Parallel()
 
@@ -71,7 +68,7 @@ func TestRelevance(t *testing.T) {
 	for _, q := range queries {
 		results := idx.SearchBM25(q.text)
 
-		// 0 означает, что нужного документа нет в выдаче.
+		// rank is 0 if no expected document is found.
 		rank := slices.IndexFunc(results, func(r search.Result) bool {
 			return slices.Contains(q.want, idx.Docs[r.DocID].Name)
 		}) + 1
@@ -91,7 +88,7 @@ func TestRelevance(t *testing.T) {
 	}
 
 	mrr := reciprocalRanks / float64(len(queries))
-	t.Logf("первое место: %d, первая десятка: %d из %d, MRR: %.3f", hitsTop1, hitsTop10, len(queries), mrr)
+	t.Logf("top 1: %d, top 10: %d of %d, MRR: %.3f", hitsTop1, hitsTop10, len(queries), mrr)
 
 	assert.GreaterOrEqual(t, hitsTop1, 13)
 	assert.GreaterOrEqual(t, hitsTop10, 23)

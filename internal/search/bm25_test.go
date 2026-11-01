@@ -15,37 +15,37 @@ func TestSearchBM25(t *testing.T) {
 		want  []Result
 	}{
 		{
-			name:  "при равном TF короткий документ выше длинного",
+			name:  "shorter document ranks higher at equal TF",
 			query: "read file",
 			want:  []Result{{DocID: 2, Score: 0.913}, {DocID: 1, Score: 0.499}, {DocID: 0, Score: 0.457}},
 		},
 		{
-			name:  "одно слово",
+			name:  "single word",
 			query: "write",
 			want:  []Result{{DocID: 1, Score: 1.042}},
 		},
 		{
-			name:  "одно из слов не найдено",
+			name:  "one word not found",
 			query: "write missing",
 			want:  []Result{{DocID: 1, Score: 1.042}},
 		},
 		{
-			name:  "слово из всех документов получает небольшой плюс, а не ноль",
+			name:  "word in every document scores above zero",
 			query: "data",
 			want:  []Result{{DocID: 1, Score: 0.142}, {DocID: 0, Score: 0.13}, {DocID: 2, Score: 0.13}},
 		},
 		{
-			name:  "очки за разные слова складываются",
+			name:  "scores add up across words",
 			query: "file data",
 			want:  []Result{{DocID: 1, Score: 0.641}, {DocID: 2, Score: 0.586}, {DocID: 0, Score: 0.13}},
 		},
 		{
-			name:  "повтор слова в запросе считается дважды",
+			name:  "repeated query word counts twice",
 			query: "read read",
 			want:  []Result{{DocID: 0, Score: 0.913}, {DocID: 2, Score: 0.913}},
 		},
 		{
-			name:  "запрос проходит через токенизатор",
+			name:  "query is tokenized",
 			query: "READ, File!",
 			want:  []Result{{DocID: 2, Score: 0.913}, {DocID: 1, Score: 0.499}, {DocID: 0, Score: 0.457}},
 		},
@@ -59,10 +59,10 @@ func TestSearchBM25(t *testing.T) {
 		})
 	}
 
-	t.Run("при равных очках раньше меньший DocID", func(t *testing.T) {
+	t.Run("ties break by lower DocID", func(t *testing.T) {
 		t.Parallel()
 
-		// Порядок обхода map случаен, поэтому один запуск может пройти и без DocID в сортировке.
+		// Map order is random, so a single run can pass without the tiebreak.
 		idx := newTestIndex()
 		want := []Result{{DocID: 1, Score: 0.142}, {DocID: 0, Score: 0.13}, {DocID: 2, Score: 0.13}}
 		for range 500 {
@@ -70,7 +70,7 @@ func TestSearchBM25(t *testing.T) {
 		}
 	})
 
-	t.Run("насыщение: 10 упоминаний не дают в 10 раз больше очков", func(t *testing.T) {
+	t.Run("term frequency saturates", func(t *testing.T) {
 		t.Parallel()
 
 		idx := NewIndex([]Document{
@@ -83,7 +83,7 @@ func TestSearchBM25(t *testing.T) {
 		assertResults(t, want, idx.SearchBM25("read"))
 	})
 
-	t.Run("длина: совпадение в коротком документе весит больше", func(t *testing.T) {
+	t.Run("match in a shorter document scores higher", func(t *testing.T) {
 		t.Parallel()
 
 		idx := NewIndex([]Document{
@@ -104,9 +104,9 @@ func TestSearchBM25Empty(t *testing.T) {
 		name  string
 		query string
 	}{
-		{"слова нет в индексе", "missing"},
-		{"пустой запрос", ""},
-		{"только разделители", " ,.!"},
+		{"word not in index", "missing"},
+		{"empty query", ""},
+		{"separators only", " ,.!"},
 	}
 
 	for _, tt := range tests {
@@ -117,7 +117,7 @@ func TestSearchBM25Empty(t *testing.T) {
 		})
 	}
 
-	t.Run("пустой индекс", func(t *testing.T) {
+	t.Run("empty index", func(t *testing.T) {
 		t.Parallel()
 
 		assert.Empty(t, NewIndex(nil).SearchBM25("read"))

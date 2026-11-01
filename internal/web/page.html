@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>{{if .HasSearch}}{{.Query}} · {{end}}godex</title>
+<style>
+:root {
+  --bg: #1a1b26;
+  --surface: #1f2335;
+  --code: #16161e;
+  --hover: rgba(192, 202, 245, 0.05);
+  --text: #c0caf5;
+  --text-soft: #a9b1d6;
+  --muted: #8b94bf;
+  --border: #292e42;
+  --accent: #7aa2f7;
+  --accent-soft: rgba(122, 162, 247, 0.1);
+  --mark: rgba(122, 162, 247, 0.14);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  --header: 72px;
+  --page: 1320px;
+  --gutter: 24px;
+  --list: 420px;
+  --gap: 24px;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; }
+kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 12px/1.4 var(--mono);
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--header);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.brand {
+  color: var(--text);
+  font: 700 20px/1 var(--mono);
+  letter-spacing: -0.04em;
+}
+.brand:hover { text-decoration: none; }
+.brand span { color: var(--accent); }
+
+form { position: relative; flex: 1; max-width: 640px; min-width: 0; }
+form svg {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+input[type=search] {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px 0 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type=search]::-webkit-search-cancel-button { display: none; }
+input[type=search]::placeholder { color: var(--muted); }
+input[type=search]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+form kbd { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); pointer-events: none; }
+input:focus ~ kbd { display: none; }
+
+body:has(.hero) header {
+  position: static;
+  height: auto;
+  border-bottom: 0;
+  background: none;
+  backdrop-filter: none;
+}
+body:has(.hero) .bar {
+  flex-direction: column;
+  gap: 28px;
+  height: auto;
+  padding-top: 18vh;
+}
+body:has(.hero) .brand { font-size: 44px; }
+body:has(.hero) form { flex: none; width: 100%; }
+body:has(.hero) input[type=search] {
+  height: 56px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  font-size: 17px;
+}
+body:has(.hero) input[type=search]:focus { box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
+
+main { max-width: var(--page); margin: 0 auto; padding: 20px var(--gutter) 48px; }
+
+.hero { max-width: 640px; margin: 0 auto; padding-top: 4px; color: var(--muted); text-align: center; }
+.hero p { margin: 0; }
+.examples { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
+.examples a {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.examples a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+.keys { margin-top: 28px !important; font-size: 14px; }
+
+.empty { max-width: 480px; margin: 64px auto 0; color: var(--muted); text-align: center; }
+.empty strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 18px; font-weight: 600; }
+
+.summary { margin: 0 0 10px; padding: 0 12px; color: var(--muted); font-size: 14px; }
+
+.result { border-radius: 10px; }
+.result summary {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.1s;
+}
+.result summary::-webkit-details-marker { display: none; }
+.result summary:hover { background: var(--hover); }
+.result summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.result[open] summary { background: var(--accent-soft); }
+
+.title { display: block; font: 500 15px/1.45 var(--mono); overflow-wrap: anywhere; }
+.result[open] summary .title { color: var(--accent); }
+.package { display: block; color: var(--muted); font-size: 13.5px; overflow-wrap: anywhere; }
+.snippet {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.snippet mark { color: var(--text); }
+
+.detail { padding: 14px 12px 22px; }
+.detail-head { display: none; }
+.detail-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; color: var(--muted); font-size: 13.5px; }
+.score { font-family: var(--mono); }
+.external { margin-left: auto; font-weight: 500; }
+
+pre {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code);
+  font: 14px/1.6 var(--mono);
+}
+code { font-family: var(--mono); }
+.tok-kw { color: #bb9af7; }
+.tok-str { color: #9ece6a; }
+.tok-num { color: #ff9e64; }
+.tok-com { color: #8089b3; font-style: italic; }
+.tok-type { color: #2ac3de; }
+.tok-fn { color: #7aa2f7; }
+.doc { overflow-wrap: anywhere; }
+.doc > :first-child { margin-top: 0; }
+.doc p { margin: 0 0 12px; }
+.doc h3 { margin: 22px 0 8px; font-size: 17px; font-weight: 600; }
+.doc ul, .doc ol { margin: 0 0 12px; padding-left: 22px; }
+
+@media (min-width: 960px) {
+  .results { width: var(--list); }
+  .detail {
+    position: fixed;
+    top: calc(var(--header) + 20px);
+    right: calc(max(0px, (100vw - var(--page)) / 2) + var(--gutter));
+    bottom: 20px;
+    left: calc(max(0px, (100vw - var(--page)) / 2) + var(--gutter) + var(--list) + var(--gap));
+    padding: 28px 32px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .detail-head { display: block; margin-bottom: 6px; }
+  .detail-head h2 { margin: 0 0 2px; font: 600 22px/1.3 var(--mono); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .detail-head p { margin: 0; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  .detail-meta { margin: 0 0 18px; }
+  .doc { max-width: 72ch; font-size: 16.5px; line-height: 1.7; }
+}
+
+@media (max-width: 959px) {
+  .result[open] .snippet { display: none; }
+}
+
+@media (max-width: 560px) {
+  :root { --gutter: 16px; }
+  .bar { gap: 14px; }
+  .brand { font-size: 18px; }
+  form kbd, .keys { display: none; }
+  body:has(.hero) .bar { padding-top: 12vh; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="brand" href="/">go<span>dex</span></a>
+    <form action="/" method="get" role="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" value="{{.Query}}" placeholder="What are you looking for?" aria-label="Search Go documentation" autocomplete="off" spellcheck="false" {{if not .HasSearch}}autofocus{{end}}>
+      <kbd>/</kbd>
+    </form>
+  </div>
+</header>
+<main>
+{{- if not .HasSearch}}
+  <section class="hero">
+    <p>Search inside Go documentation in plain words. {{.DocCount}} symbols indexed.</p>
+    <div class="examples">
+      <a href="/?q=close+idle+connections">close idle connections</a>
+      <a href="/?q=cancel+a+context+after+a+timeout">cancel a context after a timeout</a>
+      <a href="/?q=create+a+temporary+file">create a temporary file</a>
+    </div>
+    <p class="keys"><kbd>↑</kbd> <kbd>↓</kbd> move through results</p>
+  </section>
+{{- else if not .Results}}
+  <div class="empty">
+    <strong>No results</strong>
+    Nothing in the documentation matches “{{.Query}}”. Try different words.
+  </div>
+{{- else}}
+  <div class="results">
+    <p class="summary">{{len .Results}} of {{.Total}} results</p>
+    {{- range $i, $r := .Results}}
+    <details class="result" name="results" data-name="{{.Name}}"{{if eq $i 0}} open{{end}}>
+      <summary>
+        <span class="title">{{.Title}}</span>
+        {{- if ne .Title .Package}}
+        <span class="package">{{.Package}}</span>
+        {{- end}}
+        <p class="snippet">{{.Snippet}}</p>
+      </summary>
+      <div class="detail">
+        <div class="detail-head">
+          <h2>{{.Title}}</h2>
+          {{- if ne .Title .Package}}
+          <p>{{.Package}}</p>
+          {{- end}}
+        </div>
+        <div class="detail-meta">
+          <span class="score" title="BM25 score">score {{.Score}}</span>
+          {{- if .Link}}
+          <a class="external" href="{{.Link}}" rel="noreferrer">pkg.go.dev ↗</a>
+          {{- end}}
+        </div>
+        {{- if .Decl}}
+        <pre class="decl"><code>{{.Decl}}</code></pre>
+        {{- end}}
+        <div class="doc">{{.Doc}}</div>
+      </div>
+    </details>
+    {{- end}}
+  </div>
+{{- end}}
+</main>
+<script>
+(() => {
+  const input = document.querySelector('input[name=q]');
+  const twoColumns = matchMedia('(min-width: 960px)');
+  let pending;
+  let timer;
+
+  // Fetch this same page and swap <main>.
+  async function refresh() {
+    pending?.abort();
+    pending = new AbortController();
+
+    const query = input.value.trim();
+    const url = query ? '/?q=' + encodeURIComponent(query) : '/';
+
+    try {
+      const response = await fetch(url, { signal: pending.signal });
+      const next = new DOMParser().parseFromString(await response.text(), 'text/html');
+
+      document.querySelector('main').replaceWith(next.querySelector('main'));
+      document.title = next.title;
+      history.replaceState(null, '', url);
+    } catch (error) {
+      if (error.name !== 'AbortError') location.href = url;
+    }
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(refresh, 150);
+  });
+
+  document.querySelector('form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    clearTimeout(timer);
+    refresh();
+  });
+
+  // With two columns the selected result stays open.
+  document.addEventListener('click', (event) => {
+    const summary = event.target.closest('.result summary');
+    if (summary && twoColumns.matches && summary.parentElement.open) event.preventDefault();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    if (event.key === '/' && document.activeElement !== input) {
+      event.preventDefault();
+      input.focus();
+      input.select();
+      return;
+    }
+
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+    const items = [...document.querySelectorAll('.result summary')];
+    if (items.length === 0) return;
+
+    event.preventDefault();
+
+    const current = items.indexOf(document.activeElement);
+    const step = event.key === 'ArrowDown' ? 1 : -1;
+
+    if (current + step < 0) {
+      input.focus();
+      return;
+    }
+
+    const item = items[Math.min(current + step, items.length - 1)];
+    item.focus();
+    if (twoColumns.matches) item.parentElement.open = true;
+  });
+})();
+</script>
+</body>
+</html>

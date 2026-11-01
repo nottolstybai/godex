@@ -9,7 +9,7 @@ import (
 func TestNewIndex(t *testing.T) {
 	t.Parallel()
 
-	t.Run("три документа", func(t *testing.T) {
+	t.Run("three documents", func(t *testing.T) {
 		t.Parallel()
 
 		docs := []Document{
@@ -29,7 +29,7 @@ func TestNewIndex(t *testing.T) {
 		assert.Equal(t, docs, idx.Docs)
 	})
 
-	t.Run("повторы слова в документе", func(t *testing.T) {
+	t.Run("repeated word in document", func(t *testing.T) {
 		t.Parallel()
 
 		idx := NewIndex([]Document{{Text: "read read file"}})
@@ -39,7 +39,7 @@ func TestNewIndex(t *testing.T) {
 		assert.InDelta(t, 3.0, idx.AvgLen, 0.001)
 	})
 
-	t.Run("нет документов", func(t *testing.T) {
+	t.Run("no documents", func(t *testing.T) {
 		t.Parallel()
 
 		idx := NewIndex(nil)

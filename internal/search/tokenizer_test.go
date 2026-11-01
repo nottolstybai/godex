@@ -14,18 +14,18 @@ func TestTokenize(t *testing.T) {
 		text string
 		want []string
 	}{
-		{"нижний регистр", "Read FILE", []string{"read", "file"}},
-		{"пунктуация", "Read, until EOF.", []string{"read", "until", "eof"}},
-		{"точка в имени", "io.Reader", []string{"io", "reader"}},
-		{"цифры", "HTTP/2 server", []string{"http", "2", "server"}},
-		{"переводы строк", "first line\nsecond line", []string{"first", "line", "second", "line"}},
+		{"lowercase", "Read FILE", []string{"read", "file"}},
+		{"punctuation", "Read, until EOF.", []string{"read", "until", "eof"}},
+		{"dot in name", "io.Reader", []string{"io", "reader"}},
+		{"digits", "HTTP/2 server", []string{"http", "2", "server"}},
+		{"newlines", "first line\nsecond line", []string{"first", "line", "second", "line"}},
 		{"CamelCase", "ReadAll", []string{"readall", "read", "all"}},
-		{"CamelCase из трёх слов", "CloseIdleConnections", []string{"closeidleconnections", "close", "idle", "connections"}},
-		{"аббревиатура в начале", "HTTPServer", []string{"httpserver", "http", "server"}},
-		{"аббревиатура в конце", "parseURL", []string{"parseurl", "parse", "url"}},
-		{"цифры в конце слова", "Sum256", []string{"sum256"}},
-		{"цифры в середине", "Base64Encoding", []string{"base64encoding", "base64", "encoding"}},
-		{"идентификатор в предложении", "Use io.ReadAll now", []string{"use", "io", "readall", "read", "all", "now"}},
+		{"three-word CamelCase", "CloseIdleConnections", []string{"closeidleconnections", "close", "idle", "connections"}},
+		{"leading acronym", "HTTPServer", []string{"httpserver", "http", "server"}},
+		{"trailing acronym", "parseURL", []string{"parseurl", "parse", "url"}},
+		{"trailing digits", "Sum256", []string{"sum256"}},
+		{"digits in the middle", "Base64Encoding", []string{"base64encoding", "base64", "encoding"}},
+		{"identifier in a sentence", "Use io.ReadAll now", []string{"use", "io", "readall", "read", "all", "now"}},
 	}
 
 	for _, tt := range tests {
@@ -44,8 +44,8 @@ func TestTokenizeEmpty(t *testing.T) {
 		name string
 		text string
 	}{
-		{"пустая строка", ""},
-		{"только разделители", " ,.!\n\t"},
+		{"empty string", ""},
+		{"separators only", " ,.!\n\t"},
 	}
 
 	for _, tt := range tests {
